@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GitHub Activity Feed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    .event {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2>GitHub Events</h2>
+  <div id="events"></div>
+
+  <script>
+    function loadEvents() {
+      fetch('/events')
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('events');
+          container.innerHTML = ''; // Clear previous
+
+          data.reverse().forEach(ev => {
+            let text = '';
+            const time = new Date(ev.timestamp).toUTCString();
+            if (ev.type === 'push') {
+              text = `${ev.author} pushed to ${ev.to_branch} on ${time}`;
+            } else if (ev.type === 'pull_request') {
+              text = `${ev.author} submitted a pull request from ${ev.from_branch} to ${ev.to_branch} on ${time}`;
+            } else if (ev.type === 'merge') {
+              text = `${ev.author} merged branch ${ev.from_branch} to ${ev.to_branch} on ${time}`;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'event';
+            div.textContent = text;
+            container.appendChild(div);
+          });
+        });
+    }
+
+    // Load immediately and every 15 seconds
+    loadEvents();
+    setInterval(loadEvents, 15000);
+  </script>
+</body>
+</html>
